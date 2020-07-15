@@ -98,19 +98,20 @@ class PostTest extends TestCase
 
     public function testUpdateValid() {
         // ARRANGE
-        $post = $this->createDummyBlogPost();
+        $user = $this->user();
+        $post = $this->createDummyBlogPost($user->id);
 
         $this->assertDatabaseHas('blog_posts', [
-            'title' => 'New Title',
-            'content' => 'Content of the blog post'
+            "title" => "New Title",
+            "content" => "Content of the blog post"
         ]);
 
         $params = [
-            'title' => 'Updated title',
-            'content' => 'This is updated content'
+            "title" => "Updated title",
+            "content" => "This is updated content"
         ];
 
-        $this->actingAs($this->user())
+        $this->actingAs($user)
             ->put("/posts/{$post->id}", $params)
             ->assertStatus(302)
             ->assertSessionHas('status');
@@ -118,24 +119,25 @@ class PostTest extends TestCase
         $this->assertEquals(session('status'), 'Blog post was Updated!');
 
         $this->assertDatabaseMissing('blog_posts', [
-            'title' => 'New Title',
-            'content' => 'Content of the blog post'
+            "title" => "New Title",
+            "content" => "Content of the blog post"
         ]);
 
         $this->assertDatabaseHas('blog_posts', [
-            'title' => 'Updated title',
-            'content' => 'This is updated content'
+            "title" => "Updated title",
+            "content" => "This is updated content"
         ]);
     }
 
     public function testDelete() {
-        $post = $this->createDummyBlogPost();
+        $user = $this->user();
+        $post = $this->createDummyBlogPost($user->id);
         $this->assertDatabaseHas('blog_posts', [
             'title' => 'New Title',
             'content' => 'Content of the blog post'
         ]);
 
-        $this->actingAs($this->user())
+        $this->actingAs($user)
             ->delete("/posts/{$post->id}")
             ->assertStatus(302)
             ->assertSessionHas('status');
@@ -143,19 +145,24 @@ class PostTest extends TestCase
         $this->assertEquals(session('status'), 'Blog post was Deleted!');
         // $this->assertDatabaseMissing('blog_posts', $post->toArray());
         $this->assertSoftDeleted('blog_posts', [
-            'title' => 'New Title',
-            'content' => 'Content of the blog post'
-        ]);
+        'title' => 'New Title',
+        'content' => 'Content of the blog post'
+    ]);
     }
 
-    private function createDummyBlogPost() : BlogPost {
+    private function createDummyBlogPost($userId = null) : BlogPost {
         // ARRANGE
         // $post = new BlogPost();
         // $post->title = 'New Title';
         // $post->content = 'Content of the blog post';
         // $post->save();
 
-        return factory(BlogPost::class)->state('new-title')->create();
+        return factory(BlogPost::class)->state('new-title')->create(
+            [
+                // ako nije null koristi prvi ak je koristi drugi
+                'user_id' => $userId ?? $this->user()->id
+            ]
+        );
 
         // return $post;
     }

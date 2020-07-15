@@ -26,6 +26,10 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
+        Gate::define('home.secret', function($user) {
+            return $user->is_admin;
+        });
+
         // abbility da netko moze updatati, deletati post | closure(prvi parametar=> USER, u nasem slucaju $post)
         // Gate::define('update-post', function($user, $post) {
         //     return $user->id === $post->user_id;
@@ -47,12 +51,12 @@ class AuthServiceProvider extends ServiceProvider
 
         // koristimo before kako bi provjerio prije ostalih gateova, i ako je true onda uopce ne pokrene ostale gateove!
         // useful kad imamo admina koji moze sve raditi, brisati, updatati ...
-        // Gate::before(function ($user, $ability) {
-        //     // ako maknemo delete-post onda ne mozemo obrisati postove!!
-        //     if($user->is_admin && in_array($ability, ['posts.update', /*'delete-post'*/])) {
-        //         return true;
-        //     }
-        // });
+        Gate::before(function ($user, $ability) {
+            // ako maknemo delete-post onda ne mozemo obrisati postove!!
+            if($user->is_admin && in_array($ability, ['update', /*'delete-post'*/])) {
+                return true;
+            }
+        });
 
         // result ce biti pasani od strane laravela
         // result ce vratitit true ili false ako idovi ne mecaju kod provjere u gateu

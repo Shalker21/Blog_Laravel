@@ -14,9 +14,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+// name koristimo kako bi mogli definirati u metodi route() u views
+
 Route::get('/', 'HomeController@home')->name('home');
 
 Route::get('/contact', 'HomeController@contact')->name('contact');
+Route::get('/secret', 'HomeController@secret')
+    ->name('secret')
+    ->middleware('can:home.secret');
+
 Route::resource('/posts', 'PostController');
 
 Auth::routes();

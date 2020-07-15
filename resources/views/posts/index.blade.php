@@ -17,12 +17,23 @@
                         @endif
                         <small class="d-block mb-3">Added: {{ $post->created_at->diffForHumans() }}</small>
                         <small class="d-block mb-3">By: {{ $post->user->name }}</small>
-                        <a class="btn btn-lg btn-primary" role="button" href="{{ route('posts.edit', ['post' => $post->id]) }}">Edit</a>
-                        <form class="d-inline" action="{{ route('posts.destroy', ['post' => $post->id]) }}" method="post">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-lg">Delete</button>
-                        </form>
+
+                        {{-- @cannot('delete', $post)
+                            <p>You can't delete this post!</p>
+                        @endcannot --}}
+
+                        @can('update', $post)
+                            <a class="btn btn-lg btn-primary" role="button" href="{{ route('posts.edit', ['post' => $post->id]) }}">Edit</a>
+                        @endcan
+
+                        @can('delete', $post)
+                            <form class="d-inline" action="{{ route('posts.destroy', ['post' => $post->id]) }}" method="post">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-lg">Delete</button>
+                            </form>
+                        @endcan
+
                     </div>
                 </div>
 
